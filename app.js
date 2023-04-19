@@ -25,3 +25,5 @@ app.all('*', (req, res, next) => {
   err.statusCode = 404;
   next(err);
 });
+
+module.exports = app;

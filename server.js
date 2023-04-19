@@ -9,7 +9,7 @@ const app = require("./app");
 
 console.log("MODE:", process.env.NODE_ENV);
 
-const DBCred = process.env.DATA_REMOTE.replace(
+const DBCred = process.env.DATABASE_REMOTE.replace(
   "<PASSWORD>",
   process.env.DATABASE_PASSWORD
 );
@@ -23,6 +23,8 @@ mongoose
     )
   );
 
-app.listen(process.env.PORT || 4000, () =>
+const port = process.env.PORT || 4000;
+
+app.listen(port, () =>
   console.log(`App is running at ${port} Port Number...`)
 );
