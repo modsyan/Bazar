@@ -1,5 +1,5 @@
 const mongoose = require("mongoose");
-const validator = require('validator');
+const validator = require("validator");
 
 const userSchema = new mongoose.Schema({
   firstName: {
@@ -26,13 +26,11 @@ const userSchema = new mongoose.Schema({
     unique: true,
     validate: [validator.isEmail, "Wrong Password Format"],
   },
-  password: {
-
-  },
-  cart: [mongoose.Types.ObjectId('PRODUCT')],
-  favorites: [mongoose.Types.ObjectId('PRODUCT')],
+  password: {},
+  cart: [{ type: mongoose.Types.ObjectId, ref: "PRODUCT" }],
+  favorites: [{ type: mongoose.Types.ObjectId, ref: "PRODUCT" }],
 });
 
-const User = mongoose.model('USER', userSchema);
+const User = mongoose.model("USER", userSchema);
 
 module.exports = User;
