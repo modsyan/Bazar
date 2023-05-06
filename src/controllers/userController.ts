@@ -3,18 +3,19 @@ import { GetAllUserResponse, GetAllUsersRequest } from "../shared/src/api";
 import { ExpressHandler, ExpressHandlersWithParams } from "../shared/types";
 import userModel from "../models/userModel";
 import crypto from "crypto";
+import { IUser } from "../shared/src/types";
 
 export class UserController {
   constructor() {}
 
-  public getAllUsers: ExpressHandlersWithParams< {success: boolean}, GetAllUsersRequest, GetAllUserResponse> =
+  public getAllUsers: ExpressHandler<GetAllUsersRequest, GetAllUserResponse> =
     async (req, res, next) => {
-      const users = userModel.find();
+      const users: IUser[] = await userModel.find();
 
-      return res.send({
+      res.send({
         success: true,
         data: {
-          length: (await users).length,
+          length: users.length,
           users: users,
         },
       });
