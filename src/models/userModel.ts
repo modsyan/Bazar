@@ -1,4 +1,4 @@
-import mongoose, { Document } from "mongoose";
+import mongoose from "mongoose";
 import validator from "validator";
 import { IUser } from "../shared/src/types";
 

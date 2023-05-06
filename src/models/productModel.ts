@@ -1,24 +1,6 @@
-import { Model, Schema, Types, model } from "mongoose";
-type Review = {
-  name: string;
-  rating: number;
-  comment: string;
-  user: Types.ObjectId;
-};
+import { Model, Schema, model } from "mongoose";
+import { IProduct, Review} from "../shared/src/types";
 
-export interface IProduct {
-  title: string;
-  description: string;
-  imgs: string[];
-  price: number;
-  inStock: number;
-  sold: number;
-  category: string;
-  quantity: number;
-  brand: Schema.Types.ObjectId;
-  rate: number;
-  feedback: Review[];
-}
 interface IProductMethods {}
 type ProductModel = Model<IProduct, {}, IProductMethods>;
 const reviewSchema = new Schema<Review>(
@@ -48,6 +30,16 @@ const productSchema = new Schema<IProduct>(
       default: 0,
       min: [1, "min value of rate is 1"],
       max: [5, "max value of rate is 5"],
+    },
+    discount: {
+      status: {
+        type: Boolean,
+        default: false,
+      },
+      value: {
+        type: Number,
+        default: 0,
+      },
     },
     feedback: [reviewSchema],
   },

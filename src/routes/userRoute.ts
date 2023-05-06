@@ -1,9 +1,7 @@
-import { Router } from 'express'
-import userController from '../controllers/userController';
+import { Router } from "express";
+import {  }from "../controllers/userController";
 
-Router()
-  .route('/')
-  .get(userController.getAllUsers);
+Router().route("/").get(new UserController().getAllUsers);
 
 // Router
 //   .route('/:id')

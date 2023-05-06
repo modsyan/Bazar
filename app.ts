@@ -1,7 +1,7 @@
 import express from "express";
 
 import morgan from 'morgan';
-import userRoute from './routes/userRoute';
+import {} from './routes/userRoute';
 export const app = express();
 if(process.env.NODE_ENV === "development") {
   app.use(morgan('dev'));
