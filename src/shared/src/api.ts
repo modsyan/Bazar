@@ -4,7 +4,7 @@ export interface GetAllUsersRequest {}
 export interface GetAllUserResponse {
   success: boolean,
   data:{
-    users: [IUser];
     length: number;
+    users: IUser[];
   }
 }
