@@ -56,7 +56,7 @@ exports.Login = async (req, res, next) => {
   // Generate Token
   const token = generateToken(user._id);
 
-  // Send Response
+  // Send Responsvk e
   res.status(200).json({
     success: true,
     message: "User logged in successfully",
