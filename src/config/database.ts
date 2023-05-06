@@ -1,22 +1,17 @@
 import mongoose from "mongoose";
-import { config } from "dotenv";
+import { getDbConnectionString } from "../utils/env";
 
-
-
-
-console.log("MODE:", process.env.NODE_ENV);
-
-if (!process.env.DATABASE_REMOTE || process.env.DATABASE_PASSWORD) {
-  process.exit(1);
-}
-
-
-
-mongoose
-  .connect(DBCredentials)
-  .then((conn) =>
+export const dbConnection = async () => {
+  const dbConnectionString = getDbConnectionString();
+  try {
+    // mongoose.set('strictQuery', false)
+    await mongoose.connect(dbConnectionString);
     console.log(
       "connected successfully with database: ",
-      conn.connection.db.namespace
+    mongoose.connection.db.namespace
     )
-  );
+  } catch (e) {
+    console.log('MONGO_DB FAILED CONNECTION')
+    process.exit(0)
+  }
+}
