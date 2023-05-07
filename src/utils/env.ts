@@ -1,72 +1,51 @@
-import { config } from "dotenv";
+
 import { exit } from "process";
 import { LOGGER } from "./logger";
 
-config({
-  path: "./config.env",
-});
-
-enum Environment {
-  Development = "DEVELOPMENT",
-  Production = "PRODUCTION",
-}
-
-enum DatabaseEnv {
-  Development = "DATABASE_REMOTE_DEVELOPMENT",
-  Production = "DATABASE_REMOTE_PRODUCTION",
-}
-
-enum PasswordEnv {
-  Development = "DATABASE_PASSWORD_DEVELOPMENT",
-  Production = "DATABASE_PASSWORD_PRODUCTION",
-}
-
-export enum EnvType {
-  EnvironmentDevelopment = "DEVELOPMENT",
-  EnvironmentProduction = "PRODUCTION",
-  DatabaseRemoteDevelopment = "DATABASE_REMOTE_DEVELOPMENT",
-  DatabaseRemoteProduction = "DATABASE_REMOTE_PRODUCTION",
-  DatabasePasswordDevelopment = "DATABASE_PASSWORD_DEVELOPMENT",
-  DatabasePasswordProduction = "DATABASE_PASSWORD_PRODUCTION",
-}
 
 export function getDbConnectionString(): string {
-  const currentEnvironment = process.env.NODE_ENV;
-
+  const currentEnvironment = getEnvMode();
   let databaseUrl: string | undefined;
-  let databasePassword: string | undefined;
-
   switch (currentEnvironment) {
-    case Environment.Development:
-      databaseUrl = DatabaseEnv.Development;
-      databasePassword = process.env.DATABASE_PASSWORD_DEVELOPMENT;
+    case "DEVELOPMENT":
+      databaseUrl = process.env.DATABASE_REMOTE_DEVELOPMENT;
       break;
 
-    case Environment.Production:
-      databaseUrl = process.env.DATABASE_PASSWORD_PRODUCTION;
-      databasePassword = process.env.DATABASE_PASSWORD_PRODUCTION;
+    case "PRODUCTION":
+      databaseUrl = process.env.DATABASE_REMOTE_PRODUCTION;
       break;
 
     default:
-      LOGGER.error("Invalid or missing NODE_ENV value");
+      LOGGER.error("Invalid or missing Environment Mode valuess");
       exit(1);
   }
 
-  if (!databaseUrl || !databasePassword) {
+  LOGGER.info("Development Mode:", currentEnvironment);
+
+  if (!databaseUrl) {
     LOGGER.error("Missing Database Connection String or Password");
     exit(1);
   }
 
-  return databaseUrl?.replace("<PASSWORD>", databasePassword);
+  return databaseUrl;
 }
 
 export function getPortNumber(): number {
-  const port = process.env.PORT || 4000;
-  if (typeof port === "number") {
-    return port;
-  } else {
-    return parseInt(port, 10);
+  const PORT = process.env.PORT;
+  if (!PORT) {
+    LOGGER.error("Missing Port Number required env vars!");
+    exit(1);
   }
+  return parseInt(PORT, 10);
 }
 
-export const portNumber = process.env.PORT || 4000;
+export function getEnvMode(): string {
+  const nodeEnv = process.env.NODE_ENV;
+
+  const nodeEnvState = nodeEnv != "DEVELOPMENT" && nodeEnv != "PRODUCTION";
+  if (nodeEnvState) {
+    LOGGER.error("Invalid or missing Environment Mode value");
+    exit(1);
+  }
+  return nodeEnv;
+}

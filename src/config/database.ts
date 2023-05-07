@@ -4,7 +4,7 @@ import { getDbConnectionString } from "../utils/env";
 export const dbConnection = async () => {
   const dbConnectionString = getDbConnectionString();
   try {
-    // mongoose.set('strictQuery', false)
+    mongoose.set('strictQuery', false);
     await mongoose.connect(dbConnectionString);
     console.log(
       "connected successfully with database: ",

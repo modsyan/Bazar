@@ -1,4 +1,4 @@
-import { IUser } from "./types";
+import { IProduct, IUser } from "./types";
 
 export interface GetAllUsersRequest {}
 
@@ -15,6 +15,6 @@ export interface GetAllProductsResponse{
   success: boolean;
   data: {
     length: number;
-    product
+    product: IProduct[];
   }
 }
