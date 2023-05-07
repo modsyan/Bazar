@@ -5,7 +5,7 @@ import { getPortNumber } from "./utils/env";
 import { LOGGER } from "./utils/logger";
 
 (async () => {
-  config({path:__dirname+"/config.env"});
+  config();
   // console.log(__dirname)
   // console.log(process.env.);  
   await dbConnection();
