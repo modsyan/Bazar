@@ -10,6 +10,7 @@ import {
 } from "./middlewares/authMiddleware";
 import asyncHandler from "express-async-handler";
 import { LOGGER } from "./utils/logger";
+import { errHandler } from "./middlewares/errorMiddleware";
 
 export async function createApp(logRequest = true) {
   // if(process.env.NODE_ENV === "development") {
@@ -32,17 +33,19 @@ export async function createApp(logRequest = true) {
   // map endpoint to controllers
   const CONTROLLERS: { [key in EndPoints]: RequestHandler<any, any> } = {
     [EndPoints.healthz]: (_, res) => res.send({ status: "ok" }),
-    [EndPoints.getAllProducts]: productController.getAllProducts,
+    // [EndPoints.getAllProducts]: productController.getAll¬,
     [EndPoints.getAllUser]: userController.getAllUsers,
+    [EndPoints.getAllProducts]: productController.getAll,
+
     // [EEndPoints.signin]: undefined,
     // [EEndPoints.signup]: undefined,
     // [EEndPoints.getUser]: undefined,
     // [EEndPoints.getCurrentUser]: undefined,
     // [EEndPoints.updateCurrentUser]: undefined,
-    // [EEndPoints.getProduct]: undefined,
-    // [EEndPoints.createProduct]: undefined,
-    // [EEndPoints.updateProduct]: undefined,
-    // [EEndPoints.deleteProduct]: undefined,
+    [EndPoints.getProduct]: productController.getOne,
+    [EndPoints.createProduct]: productController.addMany,
+    [EndPoints.updateProduct]: productController.update,
+    [EndPoints.deleteProduct]: productController.deleteOne,
     // [EEndPoints.topRatedProducts]: undefined,
     // [EEndPoints.topSellers]: undefined,
     // [EEndPoints.listProducts]: undefined,
@@ -51,7 +54,7 @@ export async function createApp(logRequest = true) {
   };
 
   Object.keys(EndPoints).forEach((endpointKey) => {
-    const endpoint = EndPoints[endpointKey as keyof typeof EndPoints]
+    const endpoint = EndPoints[endpointKey as keyof typeof EndPoints];
     const endPointConfig = ENDPOINT_CONFIGS[endpoint];
     const controller = CONTROLLERS[endpoint];
     LOGGER.info(controller);
@@ -72,5 +75,7 @@ export async function createApp(logRequest = true) {
       );
     }
   });
+
+  app.use(errHandler);
   return app;
 }

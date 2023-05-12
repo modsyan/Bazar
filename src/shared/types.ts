@@ -1,7 +1,7 @@
 import { RequestHandler } from "express";
 import { EnumType } from "typescript";
 
-type WithError<T> = T & { error: string };
+export type WithError<T> = T & { error: string };
 
 export type ExpressHandler<req, res> = RequestHandler<
   string,
@@ -16,5 +16,3 @@ export type ExpressHandlersWithParams<params, req, res> = RequestHandler<
   Partial<res>,
   any
 >;
-
-

@@ -28,6 +28,7 @@ export interface IProduct {
   description: string;
   imgs: string[];
   price: number;
+  oldPrice: number;
   inStock: number;
   sold: number;
   category: string;
