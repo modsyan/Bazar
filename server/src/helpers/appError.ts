@@ -46,3 +46,12 @@ export class InternalServerError extends ApiError {
     super(500, message, source);
   }
 }
+
+export class UnprocessableEntity extends ApiError {
+  constructor(
+    readonly message: string = "Unprocessable Entity",
+    source?: Error
+  ) {
+    super(422, message, source);
+  }
+}

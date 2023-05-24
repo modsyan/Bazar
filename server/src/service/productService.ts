@@ -2,7 +2,7 @@ import { Product } from "../models/productModel";
 import {
   GetAllProductsRequest,
   GetAllProductsResponse,
-} from "../shared/src/api";
+} from "../../../shared/types/api";
 
 export class ProductService {
   constructor() {}

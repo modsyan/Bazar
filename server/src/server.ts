@@ -1,13 +1,11 @@
-import { config } from "dotenv";
+import { config as dotEnvConfig } from "dotenv";
 import { createApp } from "./app";
 import { dbConnection } from "./config/database";
 import { getPortNumber } from "./utils/env";
 import { LOGGER } from "./utils/logger";
 
 (async () => {
-  config();
-  // console.log(__dirname)
-  // console.log(process.env.);  
+  dotEnvConfig();
   await dbConnection();
   const PORT = getPortNumber();
   const app = await createApp();

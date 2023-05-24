@@ -1,7 +1,7 @@
 import express, { RequestHandler } from "express";
 // import morgan from 'morgan';
 import cors from "cors";
-import { EndPoints, ENDPOINT_CONFIGS } from "./shared/src/endpoints";
+import { EndPoints, ENDPOINT_CONFIGS } from "@bazar/shared/types/endpoints";
 import { UserController } from "./controllers/userController";
 import { ProductController } from "./controllers/productController";
 import {
@@ -9,8 +9,10 @@ import {
   jwtParserMiddleware,
 } from "./middlewares/authMiddleware";
 import asyncHandler from "express-async-handler";
-import { LOGGER } from "./utils/logger";
-import { errHandler } from "./middlewares/errorMiddleware";
+// import { LOGGER } from "./utils/logger";
+import { errorHandler } from "./middlewares/errorMiddleware";
+import { AuthController } from "./controllers/authController";
+
 
 export async function createApp(logRequest = true) {
   // if(process.env.NODE_ENV === "development") {
@@ -27,37 +29,46 @@ export async function createApp(logRequest = true) {
   }
 
   // Controllers Objects
+  const authController = new AuthController();
   const userController = new UserController();
   const productController = new ProductController();
 
   // map endpoint to controllers
   const CONTROLLERS: { [key in EndPoints]: RequestHandler<any, any> } = {
     [EndPoints.healthz]: (_, res) => res.send({ status: "ok" }),
-    // [EndPoints.getAllProducts]: productController.getAll¬,
-    [EndPoints.getAllUser]: userController.getAllUsers,
-    [EndPoints.getAllProducts]: productController.getAll,
 
-    // [EEndPoints.signin]: undefined,
-    // [EEndPoints.signup]: undefined,
-    // [EEndPoints.getUser]: undefined,
-    // [EEndPoints.getCurrentUser]: undefined,
-    // [EEndPoints.updateCurrentUser]: undefined,
-    [EndPoints.getProduct]: productController.getOne,
-    [EndPoints.createProduct]: productController.addMany,
+    //auth
+    [EndPoints.login]: authController.login,
+    [EndPoints.register]: authController.register,
+
+    // user
+    [EndPoints.getUser]: userController.get,
+    [EndPoints.deleteUser]: userController.delete,
+    [EndPoints.updateUser]: userController.update,
+
+    //currentUser
+    [EndPoints.getCurrentUser]: userController.getCurrent,
+    [EndPoints.updateCurrentUser]: userController.updateCurrent,
+    [EndPoints.deleteCurrentUser]: userController.deleteCurrent,
+
+    // allUsers
+    [EndPoints.getAllUsers]: userController.getAll,
+    [EndPoints.updateAllUsers]: userController.UpdateAll, 
+
+    //products
+    [EndPoints.getProduct]: productController.getById,
+    [EndPoints.getAllProducts]: productController.getAll,
+    [EndPoints.createManyProducts]: productController.createMany,
+    [EndPoints.createProduct]: productController.create,
     [EndPoints.updateProduct]: productController.update,
-    [EndPoints.deleteProduct]: productController.deleteOne,
-    // [EEndPoints.topRatedProducts]: undefined,
-    // [EEndPoints.topSellers]: undefined,
-    // [EEndPoints.listProducts]: undefined,
-    // [EEndPoints.getWishList]: undefined,
-    // [EEndPoints.orders]: undefined
+    [EndPoints.deleteProduct]: productController.deleteById,
   };
 
   Object.keys(EndPoints).forEach((endpointKey) => {
     const endpoint = EndPoints[endpointKey as keyof typeof EndPoints];
     const endPointConfig = ENDPOINT_CONFIGS[endpoint];
     const controller = CONTROLLERS[endpoint];
-    LOGGER.info(controller);
+    // LOGGER.info(controller);
     const requiresAuth = endPointConfig.auth ?? false;
 
     if (requiresAuth) {
@@ -75,7 +86,8 @@ export async function createApp(logRequest = true) {
       );
     }
   });
+  console.log("Test");
 
-  app.use(errHandler);
+  app.use(errorHandler);
   return app;
 }

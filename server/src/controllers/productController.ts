@@ -1,28 +1,149 @@
 // import { Request, Response, NextFunction } from "express";
+
 import {
-  AddProductsRequest,
-  AddProductsResponse,
+  ExpressHandler,
+  ExpressHandlersWithParams,
+  WithError,
+} from "../types/types";
+import { Product as ProductDB } from "../models/productModel";
+import { IProduct } from "@bazar/shared/types/types";
+import { LOGGER } from "../utils/logger";
+import { Types } from "mongoose";
+
+import {
+  BadRequestError,
+  NotFoundError,
+  UnprocessableEntity,
+  UnprocessableEntity as _,
+} from "../helpers/appError";
+
+import {
+  CreateProductRequest,
+  CreateProductResponse,
   DeleteProductRequest,
   DeleteProductResponse,
   GetAllProductsRequest,
   GetAllProductsResponse,
-  GetProductByIdRequset,
+  GetProductByIdRequest,
+  GetProductByIdResponse,
+  GetProductByQueryRequest,
+  GetProductByQueryResponse,
   UpdateProductRequest,
   UpdateProductResponse,
-} from "../shared/src/api";
-import { ExpressHandler, WithError } from "../shared/types";
-// import { IProduct } from "../shared/src/types";
-// import { ProductService } from "../service/productService";
+} from "../../../shared/types/api";
 
-import { Product } from "../models/productModel";
-import { IProduct } from "../shared/src/types";
-
-// const productService = new ProductService();
 export class ProductController {
   constructor() {}
+
+  public getById: ExpressHandlersWithParams<
+    { productId: Types.ObjectId },
+    GetProductByIdRequest,
+    GetProductByIdResponse
+  > = async (req, res, next) => {
+    const productId = req.params.productId;
+    // if (!productId) next(new BadRequestError("Missing ProductId at params"));
+    const product: IProduct | null = await ProductDB.findById(productId);
+    if (!product) throw new BadRequestError("product not Found");
+
+    res.status(200).json({
+      success: true,
+      data: {
+        product: product,
+      },
+    });
+  };
+
+  public getByQuery: ExpressHandler<
+    GetProductByQueryRequest,
+    GetProductByQueryResponse
+  > = async (_req, _res, _next) => {};
+
+  public create: ExpressHandler<CreateProductRequest, CreateProductResponse> =
+    async (req, res, next) => {
+      const {
+        title,
+        description,
+        category,
+        discount,
+        images,
+        oldPrice,
+        price,
+        quantity,
+      } = req.body;
+
+      if (
+        !title ||
+        !description ||
+        !category ||
+        !discount ||
+        !images ||
+        !oldPrice ||
+        !price ||
+        !quantity
+      ) {
+        //TODO
+        // need better descriptive Error to the missing properties
+        LOGGER.error(
+          `title: ${title},\n` +
+            `description: ${description},\n` +
+            `category: ${category},\n` +
+            `discount: ${discount},\n` +
+            `images: ${images},\n` +
+            `oldPrice: ${oldPrice},\n` +
+            `price: ${price},\n` +
+            `quantity: ${quantity},\n`
+        );
+        return next(new BadRequestError());
+      }
+
+      const product: IProduct = {
+        title: title,
+        description: description,
+        images: images,
+        price: price,
+        oldPrice: oldPrice,
+        quantity: quantity,
+        category: category,
+        discount: discount,
+        sold: 0,
+        rate: 0,
+        feedback: [],
+      };
+
+      try {
+        await ProductDB.create(product);
+      } catch (error) {
+        return next(
+          new UnprocessableEntity("missing properties", error as Error)
+        );
+      }
+
+      return res
+        .status(200)
+        .json({ success: true, message: "product created successfully" });
+    };
+
+  public update: ExpressHandler<UpdateProductRequest, UpdateProductResponse> =
+    async (_req, _res, _next) => {};
+
+  public deleteById: ExpressHandlersWithParams<
+    { productId: Types.ObjectId },
+    DeleteProductRequest,
+    DeleteProductResponse
+  > = async (req, res, next) => {
+    const productId = req.params.productId;
+    const product = await ProductDB.findByIdAndDelete(productId);
+    if (!product)
+      throw new NotFoundError(`Product with ${productId} not Found`);
+
+    return res
+      .status(200)
+      .send({ success: true, message: `Product deleted successfully` });
+  };
+
   public getAll: ExpressHandler<GetAllProductsRequest, GetAllProductsResponse> =
-    async (_req, res, _next) => {
-      const product: IProduct[] = await Product.find();
+    async (_req, res, next) => {
+      const product: IProduct[] = await ProductDB.find();
       return res.status(200).json({
         success: true,
         data: {
@@ -32,15 +153,15 @@ export class ProductController {
       });
     };
 
-  public addMany: ExpressHandler<
-    AddProductsRequest[],
-    WithError<AddProductsResponse>
+  public createMany: ExpressHandler<
+    CreateProductRequest[],
+    WithError<CreateProductResponse>
   > = async (req, res, _next) => {
     const products = req.body;
     if (!products.length) throw new Error("adding products failed");
     products.forEach((prod) => {
       try {
-        Product.create(prod);
+        ProductDB.create(prod);
       } catch (e: any) {
         throw new Error("Product Creation Failed");
       }
@@ -50,27 +171,4 @@ export class ProductController {
       message: "Products Added",
     });
   };
-
-  public deleteOne: ExpressHandler<
-    DeleteProductRequest,
-    DeleteProductResponse
-  > = async (req, res, _next) => {
-    const { id } = req.body;
-    if (!id) throw new Error("Product id is missing");
-    const product = await Product.findById(id);
-    if (!product) throw new Error(`Product with that id: ${id}`);
-    await Product.findByIdAndDelete(id);
-    return res
-      .status(200)
-      .send({ success: true, message: `Product deleted successfully` });
-  };
-
-  public update: ExpressHandler<UpdateProductRequest, UpdateProductResponse> =
-    async (_req, _res, _next) => {};
-
-  public addOne: ExpressHandler<AddProductsRequest, AddProductsResponse> =
-    async (_req, _res, _next) => {};
-
-  public getOne: ExpressHandler<GetProductByIdRequset, GetAllProductsResponse> =
-    async (_req, _res, _next) => {};
 }

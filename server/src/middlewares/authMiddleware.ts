@@ -1,4 +1,4 @@
-import { ExpressHandler } from "../shared/types";
+import { ExpressHandler } from "../types/types";
 
 export const jwtParserMiddleware: ExpressHandler<any, any> = async (
   // req,

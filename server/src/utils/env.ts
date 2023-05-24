@@ -6,6 +6,7 @@ import { LOGGER } from "./logger";
 export function getDbConnectionString(): string {
   const currentEnvironment = getEnvMode();
   let databaseUrl: string | undefined;
+
   switch (currentEnvironment) {
     case "DEVELOPMENT":
       databaseUrl = process.env.DATABASE_REMOTE_DEVELOPMENT;
@@ -20,7 +21,7 @@ export function getDbConnectionString(): string {
       exit(1);
   }
 
-  LOGGER.info("Development Mode:", currentEnvironment);
+  LOGGER.info(`Development Mode: ${currentEnvironment}`);
 
   if (!databaseUrl) {
     LOGGER.error("Missing Database Connection String or Password");

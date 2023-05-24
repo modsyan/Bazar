@@ -1,6 +1,6 @@
 import mongoose from "mongoose";
 import validator from "validator";
-import { IUser } from "../shared/src/types";
+import { IUser } from "@bazar/shared/types/types";
 
 
 
@@ -47,7 +47,7 @@ const userSchema = new mongoose.Schema<IUser>({
   },
 
   Orders: [{ type: mongoose.Types.ObjectId, ref: "PRODUCT" }],
-
+  address: [{type: mongoose.Types.ObjectId, ref: "ADDRESS"}],
   wishList: [{ type: mongoose.Types.ObjectId, ref: "PRODUCT" }],
 
   role: {

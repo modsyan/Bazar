@@ -14,9 +14,10 @@
     "isolatedModules": true,
     "noEmit": true,
     "noUnusedLocals": true,
-    "noUnusedParameters": true,
+    "noUnusedParameters": false,
+    "sourceMap": true,
+    // "rootDir": ".",
     "jsx": "react-jsx",
-    // "typeRoots": ["./node_modules/@types", "src/shared/environment.d.ts"],
-
+    "typeRoots": ["./src/node_modules/@types", "./src/types", "../shared/types/"],
   }
 }
