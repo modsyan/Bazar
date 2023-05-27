@@ -35,9 +35,11 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "jest --coverage",
     "start": "nodemon src/server.ts",
-    "debug": "nodemon --config nodemon.json --inspect src/server.ts"
+    "debug": "nodemon --config nodemon.json --inspect src/server.ts",
+    "build": "tsc",
+    "generate-env-types": "node src/utils/generateEnvTypes.js"
   },
   "keywords": [],
   "author": "",

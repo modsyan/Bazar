@@ -22,3 +22,7 @@ export type ExpressHandlersWithQuery<req, res, query> = RequestHandler<
   Partial<req>,
   Partial<query>
 >;
+
+export interface JwtObject {
+  userId: string;
+}

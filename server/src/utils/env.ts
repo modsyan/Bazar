@@ -1,7 +1,5 @@
-
 import { exit } from "process";
 import { LOGGER } from "./logger";
-
 
 export function getDbConnectionString(): string {
   const currentEnvironment = getEnvMode();
@@ -49,4 +47,22 @@ export function getEnvMode(): string {
     exit(1);
   }
   return nodeEnv;
+}
+
+export function getJwtSecret(): string {
+  const jwtSecret: string | undefined = process.env.JWT_SECRET;
+  if (!jwtSecret) {
+    LOGGER.error("Missing jwt Secret key");
+    exit(1);
+  }
+  return jwtSecret;
+}
+
+export function getPasswordSalt(): string {
+  const passwordSalt: string | undefined = process.env.PASSWORD_SALT;
+  if(!passwordSalt) {
+    LOGGER.error("Missing Salt To Hash passwords");
+    exit(1);
+  }
+  return passwordSalt;
 }

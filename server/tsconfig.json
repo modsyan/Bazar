@@ -1,7 +1,18 @@
 {
+  "exclude": [
+    "client/"
+  ],
   "compilerOptions": {
+    "types": [
+      "@types/jest",
+      "@types/node"
+    ],
     "target": "ES5",
-    "lib": ["DOM", "DOM.Iterable", "ESNext"],
+    "lib": [
+      "DOM",
+      "DOM.Iterable",
+      "ESNext"
+    ],
     "allowJs": true,
     "skipLibCheck": true,
     "esModuleInterop": true,
@@ -14,10 +25,14 @@
     "isolatedModules": true,
     "noEmit": true,
     "noUnusedLocals": true,
-    "noUnusedParameters": false,
+    "noUnusedParameters": true,
     "sourceMap": true,
     // "rootDir": ".",
     "jsx": "react-jsx",
-    "typeRoots": ["./src/node_modules/@types", "./src/types", "../shared/types/"],
+    "typeRoots": [
+      "./src/node_modules/@types",
+      "./src/types",
+      "../shared/types/"
+    ],
   }
 }

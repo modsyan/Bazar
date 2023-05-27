@@ -11,7 +11,7 @@ import {
 import asyncHandler from "express-async-handler";
 // import { LOGGER } from "./utils/logger";
 import { errorHandler } from "./middlewares/errorMiddleware";
-import { AuthController } from "./controllers/authController";
+// import { AuthController } from "./controllers/authController";
 
 
 export async function createApp(logRequest = true) {
@@ -23,13 +23,11 @@ export async function createApp(logRequest = true) {
   const app = express();
   app.use(express.json());
   app.use(cors());
-
   if (logRequest) {
     // app.use();
   }
 
   // Controllers Objects
-  const authController = new AuthController();
   const userController = new UserController();
   const productController = new ProductController();
 
@@ -38,8 +36,8 @@ export async function createApp(logRequest = true) {
     [EndPoints.healthz]: (_, res) => res.send({ status: "ok" }),
 
     //auth
-    [EndPoints.login]: authController.login,
-    [EndPoints.register]: authController.register,
+    [EndPoints.login]: userController.login,
+    [EndPoints.register]: userController.register,
 
     // user
     [EndPoints.getUser]: userController.get,

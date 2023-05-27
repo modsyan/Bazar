@@ -6,6 +6,9 @@ import { IUser } from "@bazar/shared/types/types";
 
 
 const userSchema = new mongoose.Schema<IUser>({
+  id: {
+    type: String,
+  },
   firstName: {
     type: String,
     require: [true, "Missing Name of the User"],
@@ -34,6 +37,13 @@ const userSchema = new mongoose.Schema<IUser>({
     validate: [validator.isEmail, "Wrong Password Format"],
   },
 
+  phoneNumber: {
+    type: String,
+    require: [true, "Missing phoneNumber"],
+    unique: true,
+    validate: [validator.isEmail, "Wrong Password Format"],
+  },
+
   birthDate: {
     type: Date,
     // TODO
@@ -44,6 +54,7 @@ const userSchema = new mongoose.Schema<IUser>({
   password: {
     type: String,
     required: [true, "Missing Password"],
+    minlength: [8, "minimum of letter is 8"],
   },
 
   Orders: [{ type: mongoose.Types.ObjectId, ref: "PRODUCT" }],
@@ -58,5 +69,5 @@ const userSchema = new mongoose.Schema<IUser>({
 {timestamps: true,}
 );
 
-export default mongoose.model<[IUser]>("USER", userSchema);
+export const User = mongoose.model<[IUser]>("USER", userSchema);
 

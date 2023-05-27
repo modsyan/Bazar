@@ -26,8 +26,8 @@ export class ProductService {
     }
   }
   public getTopRatedProducts() {}
-  public getProduct(productId: string) {}
+  public getProduct(_productId: string) {}
   public createProduct() {}
-  public updateProduct(productId: string) {}
-  public deleteProduct(productId: string) {}
+  public updateProduct(_productId: string) {}
+  public deleteProduct(_productId: string) {}
 }

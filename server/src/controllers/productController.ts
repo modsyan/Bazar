@@ -39,7 +39,7 @@ export class ProductController {
     { productId: Types.ObjectId },
     GetProductByIdRequest,
     GetProductByIdResponse
-  > = async (req, res, next) => {
+  > = async (req, res, _next) => {
     const productId = req.params.productId;
     // if (!productId) next(new BadRequestError("Missing ProductId at params"));
     const product: IProduct | null = await ProductDB.findById(productId);
@@ -130,7 +130,7 @@ export class ProductController {
     { productId: Types.ObjectId },
     DeleteProductRequest,
     DeleteProductResponse
-  > = async (req, res, next) => {
+  > = async (req, res, _next) => {
     const productId = req.params.productId;
     const product = await ProductDB.findByIdAndDelete(productId);
     if (!product)
@@ -142,7 +142,7 @@ export class ProductController {
   };
 
   public getAll: ExpressHandler<GetAllProductsRequest, GetAllProductsResponse> =
-    async (_req, res, next) => {
+    async (_req, res, _next) => {
       const product: IProduct[] = await ProductDB.find();
       return res.status(200).json({
         success: true,
