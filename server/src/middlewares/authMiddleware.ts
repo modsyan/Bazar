@@ -7,11 +7,12 @@ import {
   VerifyErrors,
 } from "jsonwebtoken";
 import { User } from "../models/userModel";
+import { IUser } from "@bazar/shared/types/types";
 
 export const jwtParserMiddleware: ExpressHandler<any, any> = async (
   req,
-  _res,
-  _next
+  res,
+  next
 ) => {
   const token = req.headers.authorization?.split(" ")[1];
   if (!token)
@@ -28,13 +29,22 @@ export const jwtParserMiddleware: ExpressHandler<any, any> = async (
     }
     throw new UnauthorizedError("Bad Token");
   }
-  const user = await User.findById(payload.userId);
-  if (user) {
+  const user: IUser | null = await User.findById(payload.userId);
+  if (!user) {
+    throw new UnauthorizedError("User Not Found");
   }
+
+  res.locals.userId = user._id;
+  return next();
 };
 
-export const enforceJwtMiddleWare: ExpressHandler<any, any> = async () =>
-  // req,
-  // res,
-  // next
-  {};
+export const enforceJwtMiddleWare: ExpressHandler<any, any> = async (
+  _req,
+  res,
+  next
+) => {
+  if(!res.locals.userId) {
+    throw new UnauthorizedError();
+  }
+  next();
+};

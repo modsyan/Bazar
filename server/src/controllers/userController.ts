@@ -8,14 +8,17 @@ import {
   GetAllUsersRequest,
   GetUserResponse,
   GetUsersRequest,
+  LoginUserRequest,
+  LoginUserResponse,
   UpdateUserRequest,
   UpdateUserResponse,
 } from "../../../shared/types/api";
-import { BadRequestError } from "../helpers/appError";
+import ApiError, { BadRequestError, NotFoundError } from "../helpers/appError";
 import { ExpressHandler, ExpressHandlersWithParams } from "../types/types";
 import { User } from "../models/userModel";
 import crypto from "crypto";
 import { getPasswordSalt } from "../utils/env";
+import { signJwt } from "../utils/auth";
 // import { IUser } from "@bazar/shared/types/types";
 // import { BadRequestError } from "../helpers/appError";
 
@@ -26,14 +29,49 @@ export class UserController {
     { userId: string },
     GetUsersRequest,
     GetUserResponse
-  > = async (_req, _res, _next) => {
-    // const userId = req.params.userId;
-    // const user: IUser | null = UserDB.findById(userId);
-    // if(!user) throw new BadRequestError(`user with ${userId} not found`);
-    // return res.status(200).send({success: true, data: {user: user}});
+  > = async (req, res, _next) => {
+    const userId = req.params.userId;
+    const user: IUser | null = await User.findById(userId);
+    if (!user) throw new NotFoundError(`user with ${userId} not found`);
+    return res.status(200).send({
+      success: true,
+      data: {
+        user: user,
+      },
+    });
   };
 
-  public login: ExpressHandler<{}, {}> = async (_req, _res, _next) => {};
+  public login: ExpressHandler<LoginUserRequest, LoginUserResponse> = async (
+    req,
+    res,
+    _next
+  ) => {
+    const { usernameOrEmail, password } = req.body;
+
+    if (!usernameOrEmail || !password)
+      throw new BadRequestError("username or password is missing");
+
+    let user: IUser | null;
+
+    try {
+      user =
+        (await User.findOne({ userName: usernameOrEmail })) ||
+        (await User.findOne({ email: usernameOrEmail }));
+    } catch (error: any) {
+      throw new Error(error);
+    }
+
+    if (!user) {
+      throw new NotFoundError("Username or Email not found");
+    }
+
+    if (user.password !== this._hashPassword(password))
+      throw new NotFoundError();
+
+    const jwt = signJwt({ userId: user._id.toString()});
+
+
+  };
 
   public register: ExpressHandler<CreateUserRequest, CreateUserResponse> =
     async (req, res, _next) => {
@@ -47,7 +85,6 @@ export class UserController {
         birthDate,
         role,
       } = req.body;
-
       if (
         !firstName ||
         !lastName ||
@@ -60,26 +97,30 @@ export class UserController {
       ) {
         //todo
         // needed to create Better Error Function to Send Missing Properties
-        const objectToSend =
-          `firstName: ${firstName}` +
-          `lastName: ${lastName}` +
-          `username: ${username}` +
-          `email: ${email}` +
-          `phoneNumber: ${phoneNumber}` +
-          `password: ${password}` +
-          `birthDate: ${birthDate}` +
-          `role: ${role}`;
+        // const objectToSend =
+        //   `firstName: ${firstName}` +
+        //   `lastName: ${lastName}` +
+        //   `username: ${username}` +
+        //   `email: ${email}` +
+        //   `phoneNumber: ${phoneNumber}` +
+        //   `password: ${password}` +
+        //   `birthDate: ${birthDate}` +
+        //   `role: ${role}`;
         //
-
         throw new BadRequestError(
-          `missing one of the properties\n may be the following are missing: ${objectToSend}`
+          `missing one of the properties\n may be the following are missing: ${req.body}`
         );
       }
       // check if the phone number or the username in duplicated
-      // await User.findOne({ username: username }).exec();
-
-      const user: IUser = {
-        id: "",
+      const isDuplicatedUserName = await User.findOne({ userName: username });
+      const isDuplicatedEmail = await User.findOne({ email: email });
+      if (isDuplicatedEmail) {
+        throw new BadRequestError("Email is already used, try another one");
+      }
+      if (isDuplicatedUserName) {
+        throw new BadRequestError("Username is already used, try another one");
+      }
+      const user: Partial<IUser> = {
         firstName: firstName,
         lastName: lastName,
         userName: username,
@@ -87,27 +128,61 @@ export class UserController {
         email: email,
         phoneNumber: phoneNumber,
         birthDate: birthDate,
-        address: [],
         role: "Buyer",
-        Orders: [],
-        wishList: [],
-        isBanned: false,
       };
-      const createdUser = await User.create(user);
-      res.status(200).send({success: true, message: `user is created ${createdUser}`})
+
+      let userCreated: IUser | null;
+
+      try {
+        userCreated = await User.create(user);
+      } catch (error: any) {
+        throw new ApiError(500, "Unhandled error accrued", error);
+      }
+      res.status(200).send({
+        success: true,
+        data: {
+          message: "successful user created",
+          user: userCreated,
+        },
+      });
     };
 
-  public update: ExpressHandler<UpdateUserRequest, UpdateUserResponse> = async (
-    _req,
-    _res,
-    _next
-  ) => {};
+  public update: ExpressHandlersWithParams<
+    { userId: string },
+    UpdateUserRequest,
+    UpdateUserResponse
+  > = async (_req, _res, _) => {
+    // const userId = req.params.userId; {
+    //   if
+  };
 
-  public delete: ExpressHandler<DeleteUserRequest, DeleteUserResponse> = async (
-    _req,
-    _res,
-    _next
-  ) => {};
+  public delete: ExpressHandlersWithParams<
+    { userId: string },
+    DeleteUserRequest,
+    DeleteUserResponse
+  > = async (req, res, _next) => {
+    const userId = req.params.userId;
+    if (!userId) {
+      throw new BadRequestError("UserId of the user to delete missing");
+    }
+    let deletedUser: IUser | null;
+
+    try {
+      deletedUser = await User.findByIdAndDelete(userId);
+    } catch (error: any) {
+      throw new ApiError(404, "Unhandled Error", error);
+    }
+
+    if (!deletedUser) {
+      throw new NotFoundError(`user with id: ${userId} not found`);
+    }
+
+    res.status(200).send({
+      success: true,
+      message: "User Is Successfully deleted",
+      deletedUser: deletedUser!,
+    });
+  };
 
   public getCurrent: ExpressHandler<GetUsersRequest, GetUserResponse> = async (
     _req,
@@ -122,15 +197,15 @@ export class UserController {
     async (_req, _res, _next) => {};
 
   public getAll: ExpressHandler<GetAllUsersRequest, GetAllUserResponse> =
-    async (_req, _res, _next) => {
-      // const users: IUser[] = await userModel.find();
-      // res.send({
-      //   success: true,
-      //   data: {
-      //     length: users.length,
-      //     users: users,
-      //   },
-      // });
+    async (_req, res, _next) => {
+      const users: IUser[] = await User.find();
+      res.send({
+        success: true,
+        data: {
+          length: users.length,
+          users: users,
+        },
+      });
     };
 
   public UpdateAll: ExpressHandler<UpdateUserRequest, UpdateUserResponse> =
@@ -141,7 +216,6 @@ export class UserController {
     const hashingAlgorithm = "sha512";
     const keyLength = 64;
     const iterations = 64;
-
     return crypto
       .pbkdf2Sync(password, salt, iterations, keyLength, hashingAlgorithm)
       .toString("hex");

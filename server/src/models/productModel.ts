@@ -1,12 +1,9 @@
 // import mongoose, { Model, Schema, model } from "mongoose";
 import { Model, Schema, model } from "mongoose";
 import { IProduct } from "@bazar/shared/types/types";
-// import userModel from "./userModel";
-// import { string } from "joi";
 
 interface IProductMethods {}
 type ProductModel = Model<IProduct, {}, IProductMethods>;
-
 
 const productSchema = new Schema<IProduct>(
   {

@@ -35,14 +35,12 @@ export async function createApp(logRequest = true) {
   const CONTROLLERS: { [key in EndPoints]: RequestHandler<any, any> } = {
     [EndPoints.healthz]: (_, res) => res.send({ status: "ok" }),
 
-    //auth
-    [EndPoints.login]: userController.login,
-    [EndPoints.register]: userController.register,
-
     // user
     [EndPoints.getUser]: userController.get,
     [EndPoints.deleteUser]: userController.delete,
     [EndPoints.updateUser]: userController.update,
+    [EndPoints.login]: userController.login,
+    [EndPoints.register]: userController.register,
 
     //currentUser
     [EndPoints.getCurrentUser]: userController.getCurrent,
@@ -66,7 +64,6 @@ export async function createApp(logRequest = true) {
     const endpoint = EndPoints[endpointKey as keyof typeof EndPoints];
     const endPointConfig = ENDPOINT_CONFIGS[endpoint];
     const controller = CONTROLLERS[endpoint];
-    // LOGGER.info(controller);
     const requiresAuth = endPointConfig.auth ?? false;
 
     if (requiresAuth) {
@@ -84,8 +81,6 @@ export async function createApp(logRequest = true) {
       );
     }
   });
-  console.log("Test");
-
   app.use(errorHandler);
   return app;
 }

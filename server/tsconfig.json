@@ -3,16 +3,13 @@
     "client/"
   ],
   "compilerOptions": {
-    "types": [
-      "@types/jest",
-      "@types/node"
-    ],
     "target": "ES5",
     "lib": [
       "DOM",
       "DOM.Iterable",
       "ESNext"
     ],
+    "types": ["@types/jest", "@types/node"],
     "allowJs": true,
     "skipLibCheck": true,
     "esModuleInterop": true,
